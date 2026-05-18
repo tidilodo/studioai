@@ -1,13 +1,27 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { rateLimit } from '@/lib/rate-limit'
 
 export async function POST(request: Request) {
+  // Rate limit: 20 requests per minute per IP
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown'
+  const { success: rateLimitOk } = rateLimit(ip, 20, 60_000)
+  if (!rateLimitOk) {
+    return NextResponse.json({ error: 'Muitas requisições. Aguarde um momento.' }, { status: 429 })
+  }
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  }
+
+  // Rate limit per user: 30 per minute (extra protection for PRO)
+  const { success: userRateOk } = rateLimit(`user:${user.id}`, 30, 60_000)
+  if (!userRateOk) {
+    return NextResponse.json({ error: 'Limite de requisições por minuto atingido.' }, { status: 429 })
   }
 
   const admin = createAdminClient()

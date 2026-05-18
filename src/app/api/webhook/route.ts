@@ -1,8 +1,40 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { createHmac } from 'crypto'
+
+function verifyMPSignature(request: Request, body: string): boolean {
+  const secret = process.env.MP_WEBHOOK_SECRET
+  if (!secret) return true // Skip verification if secret not configured yet
+
+  const xSignature = request.headers.get('x-signature')
+  const xRequestId = request.headers.get('x-request-id')
+
+  if (!xSignature || !xRequestId) return false
+
+  const parts = xSignature.split(',')
+  const ts = parts.find(p => p.trim().startsWith('ts='))?.split('=')[1]
+  const hash = parts.find(p => p.trim().startsWith('v1='))?.split('=')[1]
+
+  if (!ts || !hash) return false
+
+  // Extract data.id from body
+  const parsed = JSON.parse(body)
+  const dataId = parsed.data?.id
+
+  const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`
+  const expected = createHmac('sha256', secret).update(manifest).digest('hex')
+
+  return expected === hash
+}
 
 export async function POST(request: Request) {
-  const body = await request.json()
+  const rawBody = await request.text()
+
+  if (!verifyMPSignature(request, rawBody)) {
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
+  }
+
+  const body = JSON.parse(rawBody)
 
   if (body.type !== 'payment') {
     return NextResponse.json({ ok: true })
