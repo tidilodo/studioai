@@ -121,7 +121,7 @@ Ao final, sugira:
     let imagePrompt: string | null = null
 
     if (generateImage) {
-      imagePrompt = buildImagePrompt(topic, profile.visual_style, profile.sub_niche)
+      imagePrompt = await buildImagePrompt(topic, profile.visual_style, profile.sub_niche, copyResult)
       imageUrl = await generateContentImage(imagePrompt, user.id, profile.plan, admin)
     }
 
@@ -195,30 +195,41 @@ function parseCopyResult(text: string, type: string) {
   return { hook, body, cta, hashtags, seoKeywords }
 }
 
-function buildImagePrompt(topic: string, visualStyle: string, subNiche: string): string {
+async function buildImagePrompt(topic: string, visualStyle: string, subNiche: string, copyText: string): Promise<string> {
   const styleMap: Record<string, string> = {
-    mystic_dark: 'dark mystical atmosphere, deep purple and gold tones, sacred geometry, stars, moon phases, cosmic energy',
-    ethereal_light: 'ethereal soft light, lavender and white tones, gentle pastel colors, dreamy clouds, soft glow',
-    earth_organic: 'earthy organic tones, green sage, terracotta, natural textures, plants, wood, stones',
-    cosmic_vibrant: 'vibrant cosmic colors, deep blue and purple gradients, nebula, galaxy, bright energy bursts',
-    minimal_sacred: 'minimalist black and white with gold accents, clean lines, sacred symbols, geometric patterns',
-  }
-
-  const nicheMap: Record<string, string> = {
-    astrologia: 'zodiac symbols, celestial bodies, star charts',
-    tarot: 'tarot cards, mystical symbols, intuitive imagery',
-    reiki: 'healing hands, chakra colors, energy flow',
-    terapia_holistica: 'holistic wellness, balanced elements, healing space',
-    cristais: 'crystals, gemstones, mineral formations, light refraction',
-    fitoterapia: 'herbs, botanical illustrations, natural remedies',
-    numerologia: 'sacred numbers, geometric patterns, mathematical harmony',
-    meditacao: 'meditation pose, peaceful landscape, zen garden',
+    mystic_dark: 'dark moody atmosphere, deep purple/violet and gold accents, dramatic lighting, shadows',
+    ethereal_light: 'soft ethereal glow, lavender and pearl white, dreamy bokeh, gentle light rays',
+    earth_organic: 'warm earthy palette, terracotta and sage green, natural textures, organic shapes',
+    cosmic_vibrant: 'vibrant cosmic palette, deep blue gradients to purple, stars and nebula glow',
+    minimal_sacred: 'high contrast black and white, subtle gold leaf accents, clean negative space',
   }
 
   const style = styleMap[visualStyle] || styleMap.mystic_dark
-  const niche = nicheMap[subNiche] || nicheMap.astrologia
 
-  return `Professional social media visual for holistic content. Topic: ${topic}. Style: ${style}. Elements: ${niche}. High quality, Instagram-ready, no text overlay.`
+  const systemPrompt = `You are an expert at writing image generation prompts for FLUX AI model.
+Your prompts produce stunning, artistic, Instagram-worthy images for holistic/spiritual content creators.
+Rules:
+- Write in English only
+- Maximum 80 words
+- Be extremely specific and visual — describe composition, lighting, colors, mood
+- NEVER include text/words/letters in the image
+- Focus on one clear visual concept that connects to the content's message
+- Style reference: ${style}
+- Always include: "professional photography, 4k, Instagram post format, square composition"`
+
+  const userPrompt = `Create an image prompt for this social media content:
+Topic: ${topic}
+Content preview: ${copyText.slice(0, 200)}
+Niche: ${subNiche}
+
+Write ONLY the prompt, nothing else.`
+
+  try {
+    const prompt = await generateCopy(systemPrompt, userPrompt)
+    return prompt.replace(/^["']|["']$/g, '').trim()
+  } catch {
+    return `Artistic ${style} composition representing ${topic}, professional photography, 4k, Instagram post format, square composition, no text`
+  }
 }
 
 async function generateContentImage(prompt: string, userId: string, plan: string, admin: any): Promise<string | null> {
