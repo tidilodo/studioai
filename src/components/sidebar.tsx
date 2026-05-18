@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Sparkles, Image, Clock, CreditCard, LogOut, Zap } from 'lucide-react'
+import { Sparkles, Calendar, Clock, CreditCard, LogOut, Moon } from 'lucide-react'
 
 interface Props {
   profile: {
@@ -11,13 +11,15 @@ interface Props {
     email: string
     plan: string
     credits_remaining: number
+    brand_name?: string | null
+    sub_niche?: string | null
   } | null
 }
 
 const links = [
-  { href: '/studio', label: 'Criar', icon: Sparkles },
-  { href: '/gallery', label: 'Galeria', icon: Image },
-  { href: '/history', label: 'Histórico', icon: Clock },
+  { href: '/studio', label: 'Criar conteúdo', icon: Sparkles },
+  { href: '/calendar', label: 'Calendário astral', icon: Calendar },
+  { href: '/history', label: 'Meus conteúdos', icon: Clock },
   { href: '/pricing', label: 'Planos', icon: CreditCard },
 ]
 
@@ -35,8 +37,8 @@ export function Sidebar({ profile }: Props) {
     <aside className="w-64 border-r border-zinc-800 flex flex-col bg-zinc-950">
       <div className="p-5 border-b border-zinc-800">
         <h1 className="text-lg font-bold text-white flex items-center gap-2">
-          <Zap size={20} className="text-violet-400" />
-          StudioAI
+          <Moon size={20} className="text-violet-400" />
+          OráculoAI
         </h1>
       </div>
 
@@ -78,15 +80,15 @@ export function Sidebar({ profile }: Props) {
           )}
           {profile?.plan === 'free' && (
             <Link href="/pricing" className="block text-xs text-violet-400 hover:underline mt-2">
-              Upgrade para PRO →
+              Fazer upgrade →
             </Link>
           )}
         </div>
 
         <div className="flex items-center justify-between">
           <div className="min-w-0">
-            <p className="text-sm text-zinc-200 truncate">{profile?.name || 'Usuário'}</p>
-            <p className="text-xs text-zinc-600 truncate">{profile?.email}</p>
+            <p className="text-sm text-zinc-200 truncate">{profile?.brand_name || profile?.name || 'Usuário'}</p>
+            <p className="text-xs text-zinc-600 truncate">{profile?.sub_niche || profile?.email}</p>
           </div>
           <button onClick={handleLogout} className="p-2 text-zinc-500 hover:text-zinc-300 transition">
             <LogOut size={16} />

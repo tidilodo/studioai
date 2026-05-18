@@ -13,21 +13,21 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "StudioAI — Crie imagens incríveis com IA",
-  description: "Gere imagens com inteligência artificial usando FLUX. Transforme texto em imagens profissionais em segundos. Gratuito para começar.",
+  title: "OráculoAI — Conteúdo estratégico para terapeutas holísticos",
+  description: "Crie posts, carrosséis, stories e copies alinhados com o calendário astral. IA especializada no nicho holístico. Grátis para começar.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://studioai-khaki.vercel.app'),
   openGraph: {
-    title: "StudioAI — Crie imagens com IA",
-    description: "Transforme suas ideias em imagens profissionais em segundos. Powered by FLUX. 10 gerações grátis por dia.",
+    title: "OráculoAI — Conteúdo holístico com IA",
+    description: "A IA que entende astrologia, tarot e terapias holísticas. Gere conteúdo estratégico para suas redes em minutos.",
     url: "https://studioai-khaki.vercel.app",
-    siteName: "StudioAI",
+    siteName: "OráculoAI",
     locale: "pt_BR",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "StudioAI — Crie imagens com IA",
-    description: "Transforme suas ideias em imagens profissionais em segundos. 10 gerações grátis por dia.",
+    title: "OráculoAI — Conteúdo holístico com IA",
+    description: "A IA que entende astrologia, tarot e terapias holísticas. Gere conteúdo estratégico para suas redes.",
   },
   robots: {
     index: true,

@@ -1,57 +1,70 @@
 import { createClient } from '@/lib/supabase/server'
-import { Clock, ImageIcon } from 'lucide-react'
+import { Clock, Copy } from 'lucide-react'
+
+const TYPE_LABELS: Record<string, string> = {
+  post_feed: 'Post Feed',
+  stories: 'Stories',
+  carousel: 'Carrossel',
+  reels_script: 'Roteiro Reels',
+  blog_seo: 'Blog SEO',
+  ad_copy: 'Copy Ads',
+}
 
 export default async function HistoryPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: generations } = await supabase
-    .from('generations')
+  const { data: pieces } = await supabase
+    .from('content_pieces')
     .select('*')
     .eq('user_id', user!.id)
     .order('created_at', { ascending: false })
-    .limit(100)
+    .limit(50)
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <h2 className="text-2xl font-bold text-white mb-2">Histórico</h2>
-      <p className="text-zinc-500 text-sm mb-6">Todas as suas gerações</p>
+    <div className="max-w-4xl mx-auto">
+      <h2 className="text-2xl font-bold text-white mb-1">Meus conteúdos</h2>
+      <p className="text-zinc-400 text-sm mb-6">Todos os conteúdos que você gerou</p>
 
-      {!generations?.length ? (
+      {!pieces?.length ? (
         <div className="border border-dashed border-zinc-800 rounded-xl p-12 text-center">
           <Clock size={48} className="mx-auto mb-3 text-zinc-700" />
-          <p className="text-zinc-500">Nenhuma geração ainda</p>
-          <p className="text-zinc-600 text-sm mt-1">Vá ao Studio para criar sua primeira imagem!</p>
+          <p className="text-zinc-500">Nenhum conteúdo criado ainda</p>
+          <p className="text-zinc-600 text-sm mt-1">Vá ao Studio para criar seu primeiro conteúdo!</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {generations.map(gen => (
-            <div key={gen.id} className="group relative rounded-xl overflow-hidden border border-zinc-800">
-              {gen.image_url ? (
-                <img
-                  src={gen.image_url}
-                  alt={gen.prompt}
-                  className="w-full aspect-square object-cover"
-                  loading="lazy"
-                />
-              ) : (
-                <div className="w-full aspect-square bg-zinc-900 flex items-center justify-center">
-                  <ImageIcon size={24} className="text-zinc-700" />
-                </div>
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition flex flex-col justify-end p-3">
-                <p className="text-white text-xs line-clamp-2 mb-1">{gen.prompt}</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-zinc-400 text-[10px]">
-                    {new Date(gen.created_at).toLocaleDateString('pt-BR')}
-                  </span>
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded ${
-                    gen.status === 'completed' ? 'bg-green-500/20 text-green-400' :
-                    gen.status === 'failed' ? 'bg-red-500/20 text-red-400' :
-                    'bg-yellow-500/20 text-yellow-400'
-                  }`}>
-                    {gen.status}
-                  </span>
+        <div className="space-y-3">
+          {pieces.map(piece => (
+            <div key={piece.id} className="border border-zinc-800 rounded-xl p-4 hover:border-zinc-700 transition">
+              <div className="flex items-start gap-4">
+                {piece.image_url && (
+                  <img
+                    src={piece.image_url}
+                    alt={piece.topic}
+                    className="w-16 h-16 rounded-lg object-cover shrink-0 border border-zinc-800"
+                    loading="lazy"
+                  />
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="px-2 py-0.5 rounded bg-violet-500/10 text-violet-300 text-xs font-medium">
+                      {TYPE_LABELS[piece.type] || piece.type}
+                    </span>
+                    <span className="text-xs text-zinc-600">
+                      {new Date(piece.created_at).toLocaleDateString('pt-BR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                  <p className="text-sm text-white font-medium truncate">{piece.topic}</p>
+                  {piece.copy_hook && (
+                    <p className="text-xs text-zinc-500 mt-1 line-clamp-2">{piece.copy_hook}</p>
+                  )}
+                  {piece.hashtags && piece.hashtags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {piece.hashtags.slice(0, 5).map((tag: string) => (
+                        <span key={tag} className="text-[10px] text-violet-400">{tag}</span>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

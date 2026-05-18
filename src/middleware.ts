@@ -29,7 +29,7 @@ export async function middleware(request: NextRequest) {
 
   const path = request.nextUrl.pathname
   const isAuthPage = path === '/login' || path === '/register'
-  const isPublicPage = path === '/' || isAuthPage
+  const isPublicPage = path === '/' || isAuthPage || path.startsWith('/privacidade') || path.startsWith('/termos')
 
   if (!user && !isPublicPage) {
     const url = request.nextUrl.clone()
@@ -43,6 +43,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  supabaseResponse.headers.set('x-pathname', path)
   return supabaseResponse
 }
 

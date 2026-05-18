@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Sidebar } from '@/components/sidebar'
+import { headers } from 'next/headers'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -13,6 +14,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
     .select('*')
     .eq('id', user.id)
     .single()
+
+  const headersList = await headers()
+  const pathname = headersList.get('x-pathname') || ''
+  const isOnboarding = pathname.includes('/onboarding')
+
+  if (profile && !profile.onboarding_done && !isOnboarding) {
+    redirect('/onboarding')
+  }
 
   return (
     <div className="flex h-screen bg-zinc-950">

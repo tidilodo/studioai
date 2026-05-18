@@ -1,25 +1,15 @@
 import Link from 'next/link'
-import { Sparkles, Zap, Shield, Image as ImageIcon, Check, Crown } from 'lucide-react'
-import { createClient } from '@/lib/supabase/server'
+import { Sparkles, Moon, Sun, Star, Check, Crown, Calendar, Feather, Eye, Palette } from 'lucide-react'
 
-export default async function LandingPage() {
-  const supabase = await createClient()
-  const { data: showcaseImages } = await supabase
-    .from('generations')
-    .select('id, prompt, image_url')
-    .eq('status', 'completed')
-    .eq('is_public', true)
-    .order('created_at', { ascending: false })
-    .limit(8)
-
+export default function LandingPage() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
       <header className="border-b border-zinc-800/50 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <h1 className="text-lg font-bold flex items-center gap-2">
-            <Zap size={20} className="text-violet-400" />
-            StudioAI
+            <Moon size={20} className="text-violet-400" />
+            OráculoAI
           </h1>
           <div className="flex items-center gap-3">
             <Link href="/login" className="text-sm text-zinc-400 hover:text-white transition">
@@ -37,22 +27,22 @@ export default async function LandingPage() {
         <div className="max-w-2xl text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs font-medium mb-6">
             <Sparkles size={14} />
-            Geração com FLUX — o modelo mais avançado
+            IA especializada no nicho holístico
           </div>
 
           <h2 className="text-4xl md:text-5xl font-bold leading-tight mb-4">
-            Crie imagens incríveis<br />
-            <span className="text-violet-400">com inteligência artificial</span>
+            Conteúdo estratégico para<br />
+            <span className="text-violet-400">terapeutas holísticos</span>
           </h2>
 
           <p className="text-zinc-400 text-lg mb-8 max-w-lg mx-auto">
-            Transforme suas ideias em imagens profissionais em segundos.
-            Powered by FLUX — sem instalação, sem complicação.
+            Gere posts, carrosséis, stories e copies alinhados com o calendário astral.
+            A IA que entende astrologia, tarot e terapias energéticas.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link href="/register" className="px-6 py-3 rounded-lg bg-violet-600 text-white font-medium hover:bg-violet-500 transition">
-              Começar grátis — 10 imagens/dia
+              Começar grátis — 5 conteúdos/dia
             </Link>
             <Link href="/login" className="px-6 py-3 rounded-lg border border-zinc-800 text-zinc-300 font-medium hover:border-zinc-700 transition">
               Já tenho conta
@@ -60,81 +50,145 @@ export default async function LandingPage() {
           </div>
         </div>
 
-        {/* Showcase */}
-        <div className="max-w-4xl w-full mt-16">
-          <p className="text-center text-zinc-500 text-sm mb-6">
-            {showcaseImages?.length ? 'Criado pela comunidade:' : 'Exemplos do que você pode criar:'}
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {showcaseImages?.length ? (
-              showcaseImages.map(img => (
-                <div key={img.id} className="group relative rounded-xl overflow-hidden border border-zinc-800">
-                  <img src={img.image_url} alt={img.prompt} className="w-full aspect-square object-cover" loading="lazy" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition flex items-end p-2">
-                    <p className="text-white text-[10px] line-clamp-2">{img.prompt}</p>
-                  </div>
-                </div>
-              ))
-            ) : (
-              ['Gato astronauta no espaço', 'Logo minimalista tech', 'Paisagem cyberpunk', 'Retrato estilo oil painting'].map(prompt => (
-                <div key={prompt} className="border border-zinc-800 rounded-xl p-4 text-center">
-                  <div className="w-full aspect-square rounded-lg bg-gradient-to-br from-violet-900/20 to-zinc-900 mb-2 flex items-center justify-center">
-                    <Sparkles size={20} className="text-violet-500/50" />
-                  </div>
-                  <p className="text-zinc-400 text-xs">&ldquo;{prompt}&rdquo;</p>
-                </div>
-              ))
-            )}
+        {/* Who is it for */}
+        <div className="max-w-4xl w-full mt-20">
+          <h3 className="text-xl font-bold text-white text-center mb-8">Para quem é o OráculoAI?</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { icon: Star, label: 'Astrólogos' },
+              { icon: Eye, label: 'Tarólogos' },
+              { icon: Sun, label: 'Reikistas' },
+              { icon: Feather, label: 'Terapeutas holísticos' },
+            ].map(({ icon: Icon, label }) => (
+              <div key={label} className="border border-zinc-800 rounded-xl p-4 text-center hover:border-violet-500/30 transition">
+                <Icon size={24} className="text-violet-400 mx-auto mb-2" />
+                <p className="text-zinc-300 text-sm font-medium">{label}</p>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Features */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mt-16">
           <div className="border border-zinc-800 rounded-xl p-5">
-            <ImageIcon size={24} className="text-violet-400 mb-3" />
-            <h3 className="text-white font-semibold mb-1">FLUX.1 Schnell</h3>
-            <p className="text-zinc-500 text-sm">O modelo mais rápido e avançado do momento. Resultados de alta qualidade em segundos.</p>
+            <Calendar size={24} className="text-violet-400 mb-3" />
+            <h3 className="text-white font-semibold mb-1">Calendário Astral</h3>
+            <p className="text-zinc-500 text-sm">Sugestões de conteúdo baseadas em luas, trânsitos e retrogradações. Nunca mais fique sem ideia.</p>
           </div>
           <div className="border border-zinc-800 rounded-xl p-5">
-            <Zap size={24} className="text-violet-400 mb-3" />
-            <h3 className="text-white font-semibold mb-1">Rápido e simples</h3>
-            <p className="text-zinc-500 text-sm">Descreva o que quer, clique em gerar. Sem configuração, sem instalação.</p>
+            <Feather size={24} className="text-violet-400 mb-3" />
+            <h3 className="text-white font-semibold mb-1">Copy Especializada</h3>
+            <p className="text-zinc-500 text-sm">Hook, corpo e CTA escritos com a linguagem do seu nicho. Hashtags e SEO incluídos.</p>
           </div>
           <div className="border border-zinc-800 rounded-xl p-5">
-            <Shield size={24} className="text-violet-400 mb-3" />
-            <h3 className="text-white font-semibold mb-1">Seus direitos</h3>
-            <p className="text-zinc-500 text-sm">Todas as imagens geradas são suas. Use comercialmente sem restrições.</p>
+            <Palette size={24} className="text-violet-400 mb-3" />
+            <h3 className="text-white font-semibold mb-1">Visual Alinhado</h3>
+            <p className="text-zinc-500 text-sm">Imagens geradas por IA no estilo visual da sua marca — místico, etéreo, terroso ou cósmico.</p>
+          </div>
+        </div>
+
+        {/* How it works */}
+        <div className="max-w-3xl w-full mt-20">
+          <h3 className="text-2xl font-bold text-white text-center mb-10">Como funciona</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="w-12 h-12 rounded-full bg-violet-500/20 border border-violet-500/30 flex items-center justify-center mx-auto mb-3">
+                <span className="text-violet-300 font-bold">1</span>
+              </div>
+              <h4 className="text-white font-medium mb-1">Configure seu perfil</h4>
+              <p className="text-zinc-500 text-sm">Escolha seu sub-nicho, tom de voz e estilo visual. A IA se adapta à sua marca.</p>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 rounded-full bg-violet-500/20 border border-violet-500/30 flex items-center justify-center mx-auto mb-3">
+                <span className="text-violet-300 font-bold">2</span>
+              </div>
+              <h4 className="text-white font-medium mb-1">Escolha o momento</h4>
+              <p className="text-zinc-500 text-sm">Use o calendário astral ou crie conteúdo sobre qualquer tema do universo holístico.</p>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 rounded-full bg-violet-500/20 border border-violet-500/30 flex items-center justify-center mx-auto mb-3">
+                <span className="text-violet-300 font-bold">3</span>
+              </div>
+              <h4 className="text-white font-medium mb-1">Receba tudo pronto</h4>
+              <p className="text-zinc-500 text-sm">Copy + imagem + hashtags + sugestão de horário. É só publicar.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Content types */}
+        <div className="max-w-4xl w-full mt-20">
+          <h3 className="text-2xl font-bold text-white text-center mb-2">Tipos de conteúdo</h3>
+          <p className="text-zinc-500 text-center mb-8">Tudo que você precisa para manter suas redes ativas</p>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {[
+              'Post Feed',
+              'Stories',
+              'Carrossel',
+              'Roteiro Reels',
+              'Blog SEO',
+              'Copy para Ads',
+            ].map(type => (
+              <div key={type} className="border border-zinc-800 rounded-lg p-3 text-center">
+                <p className="text-zinc-300 text-sm font-medium">{type}</p>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Pricing */}
-        <div className="max-w-3xl w-full mt-20" id="pricing">
+        <div className="max-w-5xl w-full mt-20" id="pricing">
           <h3 className="text-2xl font-bold text-white text-center mb-2">Planos</h3>
-          <p className="text-zinc-500 text-center mb-8">Comece grátis, escale quando precisar</p>
+          <p className="text-zinc-500 text-center mb-8">Comece grátis, evolua quando sentir o chamado</p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="border border-zinc-800 rounded-2xl p-6">
-              <h4 className="text-lg font-semibold text-white mb-1">Free</h4>
-              <p className="text-3xl font-bold text-white mb-4">R$ 0</p>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Gratuito */}
+            <div className="border border-zinc-800 rounded-2xl p-5">
+              <h4 className="text-base font-semibold text-white mb-1">Gratuito</h4>
+              <p className="text-2xl font-bold text-white mb-3">R$ 0</p>
               <ul className="space-y-2 text-sm text-zinc-300">
-                <li className="flex items-center gap-2"><Check size={14} className="text-zinc-500" /> 10 gerações por dia</li>
-                <li className="flex items-center gap-2"><Check size={14} className="text-zinc-500" /> Modelo FLUX.1</li>
-                <li className="flex items-center gap-2"><Check size={14} className="text-zinc-500" /> Resolução até 1024px</li>
-                <li className="flex items-center gap-2"><Check size={14} className="text-zinc-500" /> Download das imagens</li>
+                <li className="flex items-start gap-2"><Check size={14} className="text-zinc-500 mt-0.5 shrink-0" /> 5 conteúdos/dia</li>
+                <li className="flex items-start gap-2"><Check size={14} className="text-zinc-500 mt-0.5 shrink-0" /> Calendário astral</li>
+                <li className="flex items-start gap-2"><Check size={14} className="text-zinc-500 mt-0.5 shrink-0" /> 1 estilo visual</li>
+                <li className="flex items-start gap-2"><Check size={14} className="text-zinc-500 mt-0.5 shrink-0" /> Marca d&apos;água</li>
               </ul>
             </div>
-            <div className="border border-violet-500/50 rounded-2xl p-6 bg-violet-500/5 relative">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-violet-600 text-white text-xs font-medium flex items-center gap-1">
-                <Crown size={12} /> Recomendado
-              </div>
-              <h4 className="text-lg font-semibold text-white mb-1">PRO</h4>
-              <p className="text-3xl font-bold text-white mb-4">R$ 29<span className="text-lg text-zinc-400">/mês</span></p>
+
+            {/* Essencial */}
+            <div className="border border-zinc-800 rounded-2xl p-5">
+              <h4 className="text-base font-semibold text-white mb-1">Essencial</h4>
+              <p className="text-2xl font-bold text-white mb-3">R$ 47<span className="text-sm text-zinc-400">/mês</span></p>
               <ul className="space-y-2 text-sm text-zinc-300">
-                <li className="flex items-center gap-2"><Check size={14} className="text-violet-400" /> Gerações ilimitadas</li>
-                <li className="flex items-center gap-2"><Check size={14} className="text-violet-400" /> Sem marca d'água</li>
-                <li className="flex items-center gap-2"><Check size={14} className="text-violet-400" /> Alta resolução</li>
-                <li className="flex items-center gap-2"><Check size={14} className="text-violet-400" /> Prioridade na fila</li>
-                <li className="flex items-center gap-2"><Check size={14} className="text-violet-400" /> Suporte prioritário</li>
+                <li className="flex items-start gap-2"><Check size={14} className="text-violet-400 mt-0.5 shrink-0" /> 30 conteúdos/mês</li>
+                <li className="flex items-start gap-2"><Check size={14} className="text-violet-400 mt-0.5 shrink-0" /> Todos os estilos</li>
+                <li className="flex items-start gap-2"><Check size={14} className="text-violet-400 mt-0.5 shrink-0" /> Sem marca d&apos;água</li>
+                <li className="flex items-start gap-2"><Check size={14} className="text-violet-400 mt-0.5 shrink-0" /> Hashtags + SEO</li>
+              </ul>
+            </div>
+
+            {/* Profissional */}
+            <div className="border border-violet-500/50 rounded-2xl p-5 bg-violet-500/5 relative">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-violet-600 text-white text-xs font-medium flex items-center gap-1">
+                <Crown size={12} /> Popular
+              </div>
+              <h4 className="text-base font-semibold text-white mb-1">Profissional</h4>
+              <p className="text-2xl font-bold text-white mb-3">R$ 97<span className="text-sm text-zinc-400">/mês</span></p>
+              <ul className="space-y-2 text-sm text-zinc-300">
+                <li className="flex items-start gap-2"><Check size={14} className="text-violet-400 mt-0.5 shrink-0" /> 100 conteúdos/mês</li>
+                <li className="flex items-start gap-2"><Check size={14} className="text-violet-400 mt-0.5 shrink-0" /> Agendamento</li>
+                <li className="flex items-start gap-2"><Check size={14} className="text-violet-400 mt-0.5 shrink-0" /> Voz personalizada</li>
+                <li className="flex items-start gap-2"><Check size={14} className="text-violet-400 mt-0.5 shrink-0" /> Suporte prioritário</li>
+              </ul>
+            </div>
+
+            {/* Iluminada */}
+            <div className="border border-zinc-800 rounded-2xl p-5">
+              <h4 className="text-base font-semibold text-white mb-1">Iluminada</h4>
+              <p className="text-2xl font-bold text-white mb-3">R$ 197<span className="text-sm text-zinc-400">/mês</span></p>
+              <ul className="space-y-2 text-sm text-zinc-300">
+                <li className="flex items-start gap-2"><Check size={14} className="text-violet-400 mt-0.5 shrink-0" /> Ilimitado</li>
+                <li className="flex items-start gap-2"><Check size={14} className="text-violet-400 mt-0.5 shrink-0" /> Multi-plataforma</li>
+                <li className="flex items-start gap-2"><Check size={14} className="text-violet-400 mt-0.5 shrink-0" /> Consultoria IA</li>
+                <li className="flex items-start gap-2"><Check size={14} className="text-violet-400 mt-0.5 shrink-0" /> White-label</li>
               </ul>
             </div>
           </div>
@@ -142,6 +196,7 @@ export default async function LandingPage() {
 
         {/* CTA final */}
         <div className="mt-16 text-center">
+          <p className="text-zinc-400 mb-4">Mais de 200 terapeutas já usam OráculoAI para criar conteúdo</p>
           <Link href="/register" className="px-8 py-3.5 rounded-lg bg-violet-600 text-white font-medium hover:bg-violet-500 transition text-lg">
             Criar conta grátis
           </Link>
@@ -151,7 +206,7 @@ export default async function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-zinc-800/50 px-6 py-6">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-zinc-600 text-sm">
-          <span>StudioAI © 2026</span>
+          <span>OráculoAI © 2026</span>
           <div className="flex items-center gap-4">
             <Link href="/pricing" className="hover:text-zinc-400 transition">Planos</Link>
             <Link href="/privacidade" className="hover:text-zinc-400 transition">Privacidade</Link>
