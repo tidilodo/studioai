@@ -105,7 +105,7 @@ export async function POST(request: Request) {
 function getHFModel(model: string): string {
   switch (model) {
     case 'flux-schnell': return 'black-forest-labs/FLUX.1-schnell'
-    case 'dall-e-style': return 'prompthero/openjourney-v4'
+    case 'dall-e-style': return 'stabilityai/stable-diffusion-xl-base-1.0'
     default: return 'stabilityai/stable-diffusion-xl-base-1.0'
   }
 }

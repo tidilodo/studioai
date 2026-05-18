@@ -7,7 +7,7 @@ import { Sparkles, Download, Loader2, ImageIcon } from 'lucide-react'
 const MODELS = [
   { id: 'stable-diffusion-xl', name: 'SDXL', description: 'Qualidade alta, versátil' },
   { id: 'flux-schnell', name: 'Flux Schnell', description: 'Ultra rápido' },
-  { id: 'dall-e-style', name: 'Artístico', description: 'Estilo ilustração' },
+  { id: 'dall-e-style', name: 'Artístico', description: 'Estilo artístico' },
 ]
 
 const SIZES = [
