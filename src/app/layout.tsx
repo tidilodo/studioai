@@ -14,7 +14,25 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "StudioAI — Crie imagens incríveis com IA",
-  description: "Gere imagens com inteligência artificial usando modelos como Stable Diffusion, Flux e mais. Gratuito para começar.",
+  description: "Gere imagens com inteligência artificial usando FLUX. Transforme texto em imagens profissionais em segundos. Gratuito para começar.",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://studioai-khaki.vercel.app'),
+  openGraph: {
+    title: "StudioAI — Crie imagens com IA",
+    description: "Transforme suas ideias em imagens profissionais em segundos. Powered by FLUX. 10 gerações grátis por dia.",
+    url: "https://studioai-khaki.vercel.app",
+    siteName: "StudioAI",
+    locale: "pt_BR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "StudioAI — Crie imagens com IA",
+    description: "Transforme suas ideias em imagens profissionais em segundos. 10 gerações grátis por dia.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({

@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { rateLimit } from '@/lib/rate-limit'
+import sharp from 'sharp'
 
 export async function POST(request: Request) {
   // Rate limit: 20 requests per minute per IP
@@ -65,7 +66,12 @@ export async function POST(request: Request) {
 
   try {
     // Generate image using HuggingFace Inference API
-    const imageBuffer = await generateWithHF(model, prompt, negative_prompt, width, height)
+    let imageBuffer = await generateWithHF(model, prompt, negative_prompt, width, height)
+
+    // Add watermark for free plan
+    if (profile.plan === 'free') {
+      imageBuffer = await addWatermark(imageBuffer)
+    }
 
     // Upload to Supabase Storage
     const fileName = `${user.id}/${Date.now()}.png`
@@ -113,6 +119,27 @@ export async function POST(request: Request) {
     console.error('Generation error:', err)
     return NextResponse.json({ error: 'Erro ao gerar imagem. Tente novamente.' }, { status: 500 })
   }
+}
+
+async function addWatermark(imageBuffer: Buffer): Promise<Buffer> {
+  const image = sharp(imageBuffer)
+  const metadata = await image.metadata()
+  const width = metadata.width || 1024
+  const height = metadata.height || 1024
+
+  const svg = `
+    <svg width="${width}" height="${height}">
+      <style>
+        .watermark { fill: rgba(255,255,255,0.4); font-size: ${Math.round(width * 0.05)}px; font-family: sans-serif; font-weight: bold; }
+      </style>
+      <text x="${width * 0.5}" y="${height * 0.95}" text-anchor="middle" class="watermark">StudioAI — Free</text>
+      <text x="${width * 0.5}" y="${height * 0.05 + 20}" text-anchor="middle" class="watermark" style="font-size: ${Math.round(width * 0.03)}px; fill: rgba(255,255,255,0.25)">studioai.vercel.app</text>
+    </svg>`
+
+  return image
+    .composite([{ input: Buffer.from(svg), gravity: 'center' }])
+    .png()
+    .toBuffer()
 }
 
 async function generateWithHF(

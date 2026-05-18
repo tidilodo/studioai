@@ -1,7 +1,17 @@
 import Link from 'next/link'
 import { Sparkles, Zap, Shield, Image as ImageIcon, Check, Crown } from 'lucide-react'
+import { createClient } from '@/lib/supabase/server'
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const supabase = await createClient()
+  const { data: showcaseImages } = await supabase
+    .from('generations')
+    .select('id, prompt, image_url')
+    .eq('status', 'completed')
+    .eq('is_public', true)
+    .order('created_at', { ascending: false })
+    .limit(8)
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
@@ -50,23 +60,31 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Example prompts showcase */}
+        {/* Showcase */}
         <div className="max-w-4xl w-full mt-16">
-          <p className="text-center text-zinc-500 text-sm mb-6">Exemplos do que você pode criar:</p>
+          <p className="text-center text-zinc-500 text-sm mb-6">
+            {showcaseImages?.length ? 'Criado pela comunidade:' : 'Exemplos do que você pode criar:'}
+          </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {[
-              'Gato astronauta no espaço',
-              'Logo minimalista tech',
-              'Paisagem cyberpunk',
-              'Retrato estilo oil painting',
-            ].map(prompt => (
-              <div key={prompt} className="border border-zinc-800 rounded-xl p-4 text-center">
-                <div className="w-full aspect-square rounded-lg bg-gradient-to-br from-violet-900/20 to-zinc-900 mb-2 flex items-center justify-center">
-                  <Sparkles size={20} className="text-violet-500/50" />
+            {showcaseImages?.length ? (
+              showcaseImages.map(img => (
+                <div key={img.id} className="group relative rounded-xl overflow-hidden border border-zinc-800">
+                  <img src={img.image_url} alt={img.prompt} className="w-full aspect-square object-cover" loading="lazy" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition flex items-end p-2">
+                    <p className="text-white text-[10px] line-clamp-2">{img.prompt}</p>
+                  </div>
                 </div>
-                <p className="text-zinc-400 text-xs">&ldquo;{prompt}&rdquo;</p>
-              </div>
-            ))}
+              ))
+            ) : (
+              ['Gato astronauta no espaço', 'Logo minimalista tech', 'Paisagem cyberpunk', 'Retrato estilo oil painting'].map(prompt => (
+                <div key={prompt} className="border border-zinc-800 rounded-xl p-4 text-center">
+                  <div className="w-full aspect-square rounded-lg bg-gradient-to-br from-violet-900/20 to-zinc-900 mb-2 flex items-center justify-center">
+                    <Sparkles size={20} className="text-violet-500/50" />
+                  </div>
+                  <p className="text-zinc-400 text-xs">&ldquo;{prompt}&rdquo;</p>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -136,6 +154,8 @@ export default function LandingPage() {
           <span>StudioAI © 2026</span>
           <div className="flex items-center gap-4">
             <Link href="/pricing" className="hover:text-zinc-400 transition">Planos</Link>
+            <Link href="/privacidade" className="hover:text-zinc-400 transition">Privacidade</Link>
+            <Link href="/termos" className="hover:text-zinc-400 transition">Termos de Uso</Link>
             <Link href="/register" className="hover:text-zinc-400 transition">Criar conta</Link>
           </div>
         </div>
