@@ -9,6 +9,8 @@ const client = new BedrockRuntimeClient({
 })
 
 export async function generateCopy(systemPrompt: string, userPrompt: string): Promise<string> {
+  const modelId = process.env.BEDROCK_MODEL_ID || 'anthropic.claude-3-sonnet-20240229-v1:0'
+
   const payload = {
     anthropic_version: 'bedrock-2023-05-31',
     max_tokens: 2048,
@@ -17,13 +19,18 @@ export async function generateCopy(systemPrompt: string, userPrompt: string): Pr
   }
 
   const command = new InvokeModelCommand({
-    modelId: process.env.BEDROCK_MODEL_ID || 'us.anthropic.claude-sonnet-4-6',
+    modelId,
     contentType: 'application/json',
     accept: 'application/json',
     body: JSON.stringify(payload),
   })
 
-  const response = await client.send(command)
-  const result = JSON.parse(new TextDecoder().decode(response.body))
-  return result.content[0].text
+  try {
+    const response = await client.send(command)
+    const result = JSON.parse(new TextDecoder().decode(response.body))
+    return result.content[0].text
+  } catch (err: any) {
+    console.error('Bedrock error:', err.name, err.message)
+    throw err
+  }
 }
