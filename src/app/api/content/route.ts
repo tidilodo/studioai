@@ -92,6 +92,31 @@ export async function POST(request: Request) {
   }
 
   try {
+    // Fetch current astral context (nearest event)
+    const today = new Date().toISOString().split('T')[0]
+    const { data: nearestEvents } = await admin
+      .from('astro_events')
+      .select('title, description, energy, content_suggestion, event_type')
+      .gte('date', today)
+      .order('date', { ascending: true })
+      .limit(2)
+
+    const { data: recentEvent } = await admin
+      .from('astro_events')
+      .select('title, description, energy, content_suggestion, event_type')
+      .lt('date', today)
+      .order('date', { ascending: false })
+      .limit(1)
+
+    let astralContext = ''
+    const relevantEvents = [...(nearestEvents || []), ...(recentEvent || [])]
+    if (relevantEvents.length > 0) {
+      const eventsText = relevantEvents.map(e =>
+        `• ${e.title}: ${e.description}. Energia: ${e.energy}.`
+      ).join('\n')
+      astralContext = `\nCONTEXTO ASTRAL DA SEMANA (use naturalmente se fizer sentido com o tema):\n${eventsText}\nDica de conteúdo baseada nos astros: ${relevantEvents[0].content_suggestion}`
+    }
+
     const voiceDesc = VOICE_DESCRIPTIONS[profile.voice_tone] || VOICE_DESCRIPTIONS.acolhedora
     const nicheCtx = NICHE_CONTEXT[profile.sub_niche] || NICHE_CONTEXT.astrologia
     const brandCtx = profile.brand_name ? `A marca/perfil se chama "${profile.brand_name}".` : ''
@@ -117,6 +142,7 @@ ${brandCtx}
 ${audienceText}
 ${goalsText}
 Tom de voz: ${voiceDesc}
+${astralContext}
 Idioma: Português brasileiro.
 IMPORTANTE: Não use emojis excessivos. Máximo 2-3 por post. Priorize clareza e profundidade. O conteúdo deve soar autêntico e pessoal, como se o próprio profissional tivesse escrito.`
 
