@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
-import { Clock, Copy } from 'lucide-react'
+import { Clock } from 'lucide-react'
+import { PublishActions } from '@/components/publish-actions'
 
 const TYPE_LABELS: Record<string, string> = {
   post_feed: 'Post Feed',
@@ -23,14 +24,14 @@ export default async function HistoryPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold text-white mb-1">Meus conteúdos</h2>
-      <p className="text-zinc-400 text-sm mb-6">Todos os conteúdos que você gerou</p>
+      <h2 className="text-2xl font-bold text-white mb-1">Meus conteudos</h2>
+      <p className="text-zinc-400 text-sm mb-6">Todos os conteudos que voce gerou</p>
 
       {!pieces?.length ? (
         <div className="border border-dashed border-zinc-800 rounded-xl p-12 text-center">
           <Clock size={48} className="mx-auto mb-3 text-zinc-700" />
-          <p className="text-zinc-500">Nenhum conteúdo criado ainda</p>
-          <p className="text-zinc-600 text-sm mt-1">Vá ao Studio para criar seu primeiro conteúdo!</p>
+          <p className="text-zinc-500">Nenhum conteudo criado ainda</p>
+          <p className="text-zinc-600 text-sm mt-1">Va ao Studio para criar seu primeiro conteudo.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -65,6 +66,7 @@ export default async function HistoryPage() {
                       ))}
                     </div>
                   )}
+                  <PublishActions contentId={piece.id} initialStatus={piece.publish_status} />
                 </div>
               </div>
             </div>
