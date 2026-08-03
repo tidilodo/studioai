@@ -1,4 +1,4 @@
-type ContentPiece = {
+﻿type ContentPiece = {
   id: string
   type: string
   topic: string
@@ -14,6 +14,28 @@ type Profile = {
   brand_name?: string | null
   instagram_handle?: string | null
   zernio_workspace_id?: string | null
+}
+
+type ZernioPostResponse = {
+  post?: {
+    _id?: string
+    id?: string
+    status?: string
+  }
+  data?: {
+    post?: {
+      _id?: string
+      id?: string
+      status?: string
+    }
+  }
+  id?: string
+  publication_id?: string
+}
+
+type ZernioTargetPlatform = {
+  platform: string
+  accountId: string
 }
 
 export type ZernioPublishInput = {
@@ -38,31 +60,40 @@ export function buildZernioPayload({ content, profile, platforms, scheduledAt }:
     content.hashtags?.join(' '),
   ].filter(Boolean).join('\n\n')
 
+  const accountMap = getAccountMap()
+  const targetPlatforms = platforms
+    .map(platform => normalizePlatform(platform))
+    .map(platform => ({ platform, accountId: accountMap[platform] }))
+    .filter((target): target is ZernioTargetPlatform => Boolean(target.accountId))
+
   return {
-    external_id: content.id,
-    workspace_id: profile.zernio_workspace_id || undefined,
-    brand: {
-      name: profile.brand_name || 'OraculoAI',
+    title: content.topic,
+    content: caption,
+    mediaItems: content.image_url
+      ? [{ type: 'image', url: content.image_url, title: content.topic }]
+      : undefined,
+    platforms: targetPlatforms,
+    scheduledFor: scheduledAt || undefined,
+    publishNow: !scheduledAt,
+    timezone: process.env.ZERNIO_TIMEZONE || 'America/Sao_Paulo',
+    hashtags: content.hashtags || [],
+    metadata: {
+      source: 'oraculoai',
+      external_id: content.id,
+      content_type: content.type,
+      brand_name: profile.brand_name || undefined,
       instagram_handle: profile.instagram_handle || undefined,
+      workspace_id: profile.zernio_workspace_id || process.env.ZERNIO_WORKSPACE_ID || undefined,
     },
-    content: {
-      type: content.type,
-      topic: content.topic,
-      caption,
-      image_url: content.image_url || undefined,
-      hashtags: content.hashtags || [],
-    },
-    platforms,
-    scheduled_at: scheduledAt || null,
-    source: 'oraculoai',
   }
 }
 
 export async function publishToZernio(input: ZernioPublishInput): Promise<ZernioPublishResult> {
   const payload = buildZernioPayload(input)
-  const webhookUrl = process.env.ZERNIO_WEBHOOK_URL
+  const apiUrl = process.env.ZERNIO_WEBHOOK_URL || 'https://zernio.com/api/v1/posts'
+  const apiKey = process.env.ZERNIO_API_KEY
 
-  if (!webhookUrl) {
+  if (!apiKey) {
     return {
       configured: false,
       status: input.scheduledAt ? 'scheduled' : 'queued',
@@ -70,11 +101,16 @@ export async function publishToZernio(input: ZernioPublishInput): Promise<Zernio
     }
   }
 
-  const response = await fetch(webhookUrl, {
+  const targetPlatforms = payload.platforms as ZernioTargetPlatform[]
+  if (!targetPlatforms.length) {
+    throw new Error('Configure o accountId do Zernio para a plataforma selecionada.')
+  }
+
+  const response = await fetch(apiUrl, {
     method: 'POST',
     headers: {
+      Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
-      ...(process.env.ZERNIO_API_KEY ? { Authorization: `Bearer ${process.env.ZERNIO_API_KEY}` } : {}),
     },
     body: JSON.stringify(payload),
   })
@@ -98,17 +134,43 @@ export async function publishToZernio(input: ZernioPublishInput): Promise<Zernio
     payload,
   }
 }
+
+function getAccountMap() {
+  const fromJson = process.env.ZERNIO_ACCOUNT_MAP
+  if (fromJson) {
+    try {
+      return JSON.parse(fromJson) as Record<string, string>
+    } catch {
+      return {}
+    }
+  }
+
+  return {
+    instagram: process.env.ZERNIO_INSTAGRAM_ACCOUNT_ID,
+    facebook: process.env.ZERNIO_FACEBOOK_ACCOUNT_ID,
+    linkedin: process.env.ZERNIO_LINKEDIN_ACCOUNT_ID,
+    threads: process.env.ZERNIO_THREADS_ACCOUNT_ID,
+    tiktok: process.env.ZERNIO_TIKTOK_ACCOUNT_ID,
+    youtube: process.env.ZERNIO_YOUTUBE_ACCOUNT_ID,
+    googlebusiness: process.env.ZERNIO_GOOGLE_BUSINESS_ACCOUNT_ID,
+  } as Record<string, string | undefined>
+}
+
+function normalizePlatform(platform: string) {
+  if (platform === 'google_business') return 'googlebusiness'
+  return platform
+}
+
 function extractPublicationId(data: unknown): string | undefined {
   if (!data || typeof data !== 'object') return undefined
 
-  const record = data as Record<string, unknown>
+  const record = data as ZernioPostResponse
   if (typeof record.id === 'string') return record.id
   if (typeof record.publication_id === 'string') return record.publication_id
-
-  if (record.data && typeof record.data === 'object') {
-    const nested = record.data as Record<string, unknown>
-    if (typeof nested.id === 'string') return nested.id
-  }
+  if (typeof record.post?._id === 'string') return record.post._id
+  if (typeof record.post?.id === 'string') return record.post.id
+  if (typeof record.data?.post?._id === 'string') return record.data.post._id
+  if (typeof record.data?.post?.id === 'string') return record.data.post.id
 
   return undefined
 }
