@@ -90,7 +90,7 @@ export function buildZernioPayload({ content, profile, platforms, scheduledAt }:
 
 export async function publishToZernio(input: ZernioPublishInput): Promise<ZernioPublishResult> {
   const payload = buildZernioPayload(input)
-  const apiUrl = process.env.ZERNIO_WEBHOOK_URL || 'https://zernio.com/api/v1/posts'
+  const apiUrl = process.env.ZERNIO_POSTS_API_URL || 'https://zernio.com/api/v1/posts'
   const apiKey = process.env.ZERNIO_API_KEY
 
   if (!apiKey) {
@@ -174,4 +174,5 @@ function extractPublicationId(data: unknown): string | undefined {
 
   return undefined
 }
+
 
