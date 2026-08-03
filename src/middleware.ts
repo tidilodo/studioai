@@ -1,4 +1,4 @@
-import { createServerClient } from '@supabase/ssr'
+﻿import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
@@ -30,8 +30,9 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
   const isAuthPage = path === '/login' || path === '/register'
   const isPublicPage = path === '/' || isAuthPage || path.startsWith('/privacidade') || path.startsWith('/termos') || path.startsWith('/akasha')
+  const isPublicApi = path === '/api/webhook' || path === '/api/webhooks/zernio'
 
-  if (!user && !isPublicPage) {
+  if (!user && !isPublicPage && !isPublicApi) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
@@ -50,3 +51,4 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: ['/((?!_next/static|_next/image|favicon.ico|api/auth).*)'],
 }
+
